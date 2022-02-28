@@ -14,6 +14,9 @@ import kotlin.math.sin
  */
 class MainLayoutManager : RecyclerView.LayoutManager() {
 
+    private var scrollAngle: Int = 0
+
+
     override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
         return RecyclerView.LayoutParams(
             RecyclerView.LayoutParams.MATCH_PARENT,
@@ -34,11 +37,9 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
                 addView(view)
                 measureChildWithDecorationsAndMargin(view, 0, 0)
 
-                val viewX: Int
-                val viewY: Int
                 val angle = ((360 / itemCount) * pos) % 360
-                viewX = (centralX + cos(angle * TO_RADIANS) * radius).toInt()
-                viewY = (centralY + sin(angle * TO_RADIANS) * radius).toInt()
+                val viewX = (centralX + cos(angle * TO_RADIANS) * radius).toInt()
+                val viewY = (centralY + sin(angle * TO_RADIANS) * radius).toInt()
 
                 layoutDecorated(
                     view,
@@ -60,13 +61,14 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
         return 0
     }
 
+
     private fun scrollVertically(dy: Int, recycler: RecyclerView.Recycler?) {
         val viewWidth = (width * 0.075).toInt()
         val viewHeight = (width * 0.075).toInt()
         val centralX = width / 2
         val centralY = height / 2
         val radius = width / 4
-        val moveAngle =  (-dy) * TO_RADIANS
+        val moveAngle =  (-dy) % 3
 
         removeAllViews()
         for (pos in 0 until itemCount) {
@@ -75,11 +77,12 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
                 addView(view)
                 measureChildWithDecorationsAndMargin(view, 0, 0)
 
-                val viewX: Int
-                val viewY: Int
                 val angle = ((360 / itemCount) * pos) % 360
-                viewX = (centralX + cos(angle * TO_RADIANS + moveAngle) * radius).toInt()
-                viewY = (centralY + sin(angle * TO_RADIANS + moveAngle) * radius).toInt()
+                scrollAngle = (scrollAngle + moveAngle) % 360
+                val finalAngle = angle + scrollAngle
+
+                val viewX = (centralX + cos(finalAngle * TO_RADIANS) * radius).toInt()
+                val viewY = (centralY + sin(finalAngle * TO_RADIANS) * radius).toInt()
 
                 layoutDecorated(
                     view,
