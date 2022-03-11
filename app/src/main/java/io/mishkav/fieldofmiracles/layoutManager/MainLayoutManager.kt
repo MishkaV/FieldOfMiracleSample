@@ -1,9 +1,13 @@
 package io.mishkav.fieldofmiracles.layoutManager
 
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import java.lang.Float.max
+import kotlin.concurrent.thread
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -14,8 +18,7 @@ import kotlin.math.sin
  */
 class MainLayoutManager : RecyclerView.LayoutManager() {
 
-    private var scrollAngle: Int = 0
-
+    private var scrollAngle: MutableList<Int> = mutableListOf()
 
     override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
         return RecyclerView.LayoutParams(
@@ -38,6 +41,8 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
                 measureChildWithDecorationsAndMargin(view, 0, 0)
 
                 val angle = ((360 / itemCount) * pos) % 360
+                scrollAngle.add(angle)
+
                 val viewX = (centralX + cos(angle * TO_RADIANS) * radius).toInt()
                 val viewY = (centralY + sin(angle * TO_RADIANS) * radius).toInt()
 
@@ -57,10 +62,14 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
     }
 
     override fun scrollVerticallyBy(dy: Int, recycler: RecyclerView.Recycler?, state: RecyclerView.State?): Int {
-        scrollVertically(dy, recycler)
+        val minus: Int
+        if (dy < 0)
+            minus = -1
+        else
+            minus = 1
+        scrollVertically(5 * minus, recycler)
         return 0
     }
-
 
     private fun scrollVertically(dy: Int, recycler: RecyclerView.Recycler?) {
         val viewWidth = (width * 0.075).toInt()
@@ -68,7 +77,6 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
         val centralX = width / 2
         val centralY = height / 2
         val radius = width / 4
-        val moveAngle =  (-dy) % 3
 
         removeAllViews()
         for (pos in 0 until itemCount) {
@@ -78,11 +86,12 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
                 measureChildWithDecorationsAndMargin(view, 0, 0)
 
                 val angle = ((360 / itemCount) * pos) % 360
-                scrollAngle = (scrollAngle + moveAngle) % 360
-                val finalAngle = angle + scrollAngle
+                scrollAngle[pos] = (scrollAngle[pos] + dy) % 360
+                Log.d("TAG_CHECK", "${scrollAngle[pos]} - $angle")
+                // val finalAngle = angle + scrollAngle
 
-                val viewX = (centralX + cos(finalAngle * TO_RADIANS) * radius).toInt()
-                val viewY = (centralY + sin(finalAngle * TO_RADIANS) * radius).toInt()
+                val viewX = (centralX + cos(scrollAngle[pos] * TO_RADIANS) * radius).toInt()
+                val viewY = (centralY + sin(scrollAngle[pos] * TO_RADIANS) * radius).toInt()
 
                 layoutDecorated(
                     view,
