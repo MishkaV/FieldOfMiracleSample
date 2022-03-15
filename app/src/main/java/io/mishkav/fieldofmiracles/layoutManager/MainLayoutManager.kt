@@ -87,8 +87,6 @@ class MainLayoutManager : RecyclerView.LayoutManager() {
 
                 val angle = ((360 / itemCount) * pos) % 360
                 scrollAngle[pos] = (scrollAngle[pos] + dy) % 360
-                Log.d("TAG_CHECK", "${scrollAngle[pos]} - $angle")
-                // val finalAngle = angle + scrollAngle
 
                 val viewX = (centralX + cos(scrollAngle[pos] * TO_RADIANS) * radius).toInt()
                 val viewY = (centralY + sin(scrollAngle[pos] * TO_RADIANS) * radius).toInt()
